@@ -1,0 +1,1 @@
+powershell -noexit "& ""H:\Recursos DotNet\Automacao\ScriptsPowerShell\StartApps.ps1"""
