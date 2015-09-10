@@ -55,4 +55,8 @@ Write-Host "Aguarde enquanto inicio suas aplicacoes..."
 
 # TODO: Manter aberta a janela de script powerShell
 
+#"D:\Ferramentas\Executor64bitTestBuild\Executor.exe"
+
+Write-Host ""
+
 PAUSE
