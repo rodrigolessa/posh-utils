@@ -1,1 +1,1 @@
-PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& 'D:\Projetos\scripts.launcher.deploy\IniciandoApplicacoes\IniciarAplicativos.ps1'"
+PowerShell -NoProfile -ExecutionPolicy Bypass -noexit -Command "& 'D:\Projetos\scripts.launcher.deploy\IniciandoApplicacoes\IniciarAplicativos.ps1'"

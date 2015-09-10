@@ -1,21 +1,6 @@
 set-executionpolicy -scope CurrentUser -executionPolicy Undefined
 
 Write-Host ""
-Write-Host "MMMMMMMMMMMMMMMMMMMMM.                             MMMMMMMMMMMMMMMMMMMMM"
-Write-Host " 'MMMMMMMMMMMMMMMMMMMM           M\  /M           MMMMMMMMMMMMMMMMMMMM'"
-Write-Host "   'MMMMMMMMMMMMMMMMMMM          MMMMMM          MMMMMMMMMMMMMMMMMMM'"
-Write-Host "     MMMMMMMMMMMMMMMMMMM-_______MMMMMMMM_______-MMMMMMMMMMMMMMMMMMM"
-Write-Host "      MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
-Write-Host "      MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
-Write-Host "      MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
-Write-Host "     .MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM."
-Write-Host "    MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
-Write-Host "                   'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM'"
-Write-Host "                          'MMMMMMMMMMMMMMMMMM'"
-Write-Host "                              'MMMMMMMMMM'"
-Write-Host "                                 MMMMMM"
-Write-Host "                                  MMMM"
-Write-Host "                                   MM"
 Write-Host ""
 
 Write-Host "Seja bem-vindo" -nonewline
@@ -53,10 +38,11 @@ Write-Host "Aguarde enquanto inicio suas aplicacoes..."
 
 # TODO: Set Netuno:101 Apol on IE Browser, login and open reconnect.asp
 
-# TODO: Manter aberta a janela de script powerShell
-
-#"D:\Ferramentas\Executor64bitTestBuild\Executor.exe"
+# Ativar Application Launcher
+[Diagnostics.Process]::Start("D:\Ferramentas\Executor64bitTestBuild\Executor.exe")
 
 Write-Host ""
 
-PAUSE
+# TODO: Manter aberta a janela de script powerShell
+# -noexit
+#PAUSE
