@@ -41,9 +41,9 @@ if((Test-Path $fullPhysicalPath) -eq 0)
 # Verifica se é Developer ou Tester
 $userType = Read-Host "Qual o tipo do usuario? [D] Desenvolvedor ou [T] Tester";
 
-if($userType.ToString().ToLower() eq "d")
+if(!($userType.ToString().ToLower() -eq "d"))
 {
-   $siteName = "Dev_$userName";
+	$siteName = "Dev_$userName";
 } else {
 	$siteName = "Test_$userName";
 }
@@ -51,7 +51,7 @@ if($userType.ToString().ToLower() eq "d")
 #$appPath = "IIS:\Sites\Default Web Site\";
 $appPath = "IIS:\Sites\$siteName\";
 
-IIS:\>New-WebSite -Name TestSite -Port 80 -HostHeader TestSite -PhysicalPath "$env:systemdrive\inetpub\testsite"
+New-WebSite -Name $siteName -Port 81 -HostHeader $siteName -PhysicalPath $fullPhysicalPath
 
 # Criando lista de aplicações
 #$apps = New-Object System.Collections.ArrayList
