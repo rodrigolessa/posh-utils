@@ -3,96 +3,141 @@
 Set-executionpolicy -scope CurrentUser -executionPolicy Undefined
 
 # Importando módulos para ter acesso ao recursos do IIS
-Import-Module WebAdministration
+Import-Module WebAdministration;
 
-Write-Host ""
-Write-Host "Seja bem-vindo" -nonewline
-Write-Host " Rodrigo " -foregroundcolor red -nonewline
-Write-Host "!"
+
+Write-Host "";
+Write-Host "Seja bem-vindo" -nonewline;
+Write-Host " Rodrigo " -foregroundcolor red -nonewline;
+Write-Host "!";
+
 
 ###############################################################################################
 # Selecionar qual o diretório físico das aplicações
 
-#$physicalPath = "D:\Projetos_web\Copias_trabalho\";
-$physicalPath = "C:\Temp\";
+# TODO: Change drive letter
+$physicalPath = "C:\Projetos_web\Copias_trabalho\";
 
-$useDefaultPhysicalPath = Read-Host "Usar o diretorio padrao? ($physicalPath) [S] Sim ou [N] Nao";
+Write-Host "";
+
+$useDefaultPhysicalPath = Read-Host "Usar o DIRETORIO padrao? ($physicalPath) [S] Sim ou [N] Nao";
 
 if(!($useDefaultPhysicalPath.ToString().ToLower() -eq "sim" -or $useDefaultPhysicalPath.ToString().ToLower() -eq "s"))
 {
-   $physicalPath = Read-Host "Informe o diretorio fisico que gostaria de criar a aplicacao";
+	Write-Host "";
+	$physicalPath = Read-Host "Informe o diretorio fisico que gostaria de criar a aplicacao";
 }
 
-$userName = Read-Host "Informe o nome do Usuario";
+Write-Host "";
 
-$fullPhysicalPath = "$physicalPath$userName\"
+$userName = Read-Host "Informe o nome do USUARIO:";
 
-# Se não existir cria a raiz do diretório físico
+$fullPhysicalPath = "$physicalPath$userName\";
+
+# Se NÃO existir cria a raiz do diretório físico
 if((Test-Path $fullPhysicalPath) -eq 0)
 {
 	New-Item -ItemType directory -Path $fullPhysicalPath;
 }
 
+
 ###############################################################################################
 # Selecionar qual o diretório virtual no IIS
 
-#$siteName = Read-Host "Informe o web site que deseja criar as aplicacoes";
+Write-Host "";
 
 # Verifica se é Developer ou Tester
-$userType = Read-Host "Qual o tipo do usuario? [D] Desenvolvedor ou [T] Tester";
+$userType = Read-Host "Qual o TIPO do usuario? [D] Desenvolvedor ou [T] Tester";
 
 if(!($userType.ToString().ToLower() -eq "d"))
 {
-	$siteName = "Dev_$userName";
-} else {
 	$siteName = "Test_$userName";
+} else {
+	$siteName = "Dev_$userName";
 }
 
 #$appPath = "IIS:\Sites\Default Web Site\";
 $appPath = "IIS:\Sites\$siteName\";
 
-New-WebSite -Name $siteName -Port 81 -HostHeader $siteName -PhysicalPath $fullPhysicalPath
+Write-Host "";
 
-# Criando lista de aplicações
-#$apps = New-Object System.Collections.ArrayList
-#$apps.AddRange("Apol", "Apolcli", "Estatisticas", "Intranet", "Portal_webseek", "Siteld", "Webseek", "WebServices", "WSeekJuris")
-$apps = "Apol", "Apolcli", "Estatisticas", "Intranet", "Portal_webseek", "Siteld", "Webseek", "WebServices", "WSeekJuris"
+$appPort = Read-Host "Informe uma PORTA para o site do usuario";
+
+# Criando novo SITE com o nome do usuário
+if((Test-Path $appPath) -eq 0)
+{
+	New-WebSite -Name $siteName -Port $appPort -HostHeader $siteName -PhysicalPath $fullPhysicalPath;
+}
 
 # Aplicações e versões em Urano (SVN)
-#Apol - http://urano:405/svn/Apol/trunk/Apol
-#Apolcli - http://urano:405/svn/apol/trunk/apolcli
-#Estatisticas - ? (criar script para build)
-#Intranet - ? (criar script para build)
+#Apol 			- http://urano:405/svn/Apol/trunk/Apol
+#Apolcli		- http://urano:405/svn/Apol/trunk/apolcli
+#WebServices 	- http://urano:405/svn/Apol/trunk/WebServices
+#Estatisticas	- ? (criar script para build)
+#Intranet		- ? (criar script para build)
 #Portal_webseek - http://urano:405/svn/Intranet/trunk/Portal_webseek
-#Siteld - http://urano:405/svn/siteld/trunk/Siteld
-#Webseek - http://urano:405/svn/siteld/trunk/webseek
-#WebServices - http://urano:405/svn/Apol/trunk/WebServices
-#WSeekJuris - http://urano:405/svn/siteld/trunk/WSeekJuris
+#Siteld 		- http://urano:405/svn/siteld/trunk/Siteld
+#Webseek 		- http://urano:405/svn/siteld/trunk/webseek
+#WSeekJuris 	- http://urano:405/svn/siteld/trunk/WSeekJuris
+
 
 ###############################################################################################
-# Criando aplicações no Servidor
+# Criando aplicações no Servidor IIS de Netuno
+
+# Definindo lista de aplicações
+# * - Cria o site com redundância
+# @ - Cria o site com pool próprio com dotNet 4.0
+# ! - Converte somente para aplicação o subsite do site anterior
+# | - Converte para aplicação com o endereço do site anterior
+$apps = "Apol*", "!ViewPDF", "!Utilitario", "|captcha", "Apolcli", "Estatisticas@", "Intranet@", "Portal_webseek", "Siteld", "Webseek*", "WebServices", "!wsCartas", "!wsProcessos", "WSeekJuris*";
+
+# Cria um POOL com o nome do site/usuário
+if((Test-Path IIS:\AppPools\$siteName) -eq 0)
+{
+	New-WebAppPool -Name $siteName -Force;
+}
 
 foreach ($appName in $apps)
 {
-	# Se não existir um Pool com o nome da aplicação, cria!
+	$carryOver = $appName -match "\*"
+
+	# Removendo atributos das aplicações
+	$appName = $appName -replace "*", "";
+	$appName = $appName -replace "@", "";
+	$appName = $appName -replace "!", "";
+	$appName = $appName -replace "|", "";
+
+	# Se NÃO existir um Pool com o nome da aplicação, cria!, somente para aplicações .Net
 	if((Test-Path IIS:\AppPools\$appName) -eq 0)
 	{
 	    New-WebAppPool -Name $appName -Force;
 	}
 
-	# Se não existir cria o diretório físico e virtual, se existir o físico, converte para aplicação
+	# Se NÃO existir cria o diretório físico e virtual, se existir o físico, converte para aplicação
 	if((Test-Path $appPath$appName) -eq 0 -and (Get-WebApplication -Name $appName) -eq $null)
 	{
 	    New-Item -ItemType directory -Path $fullPhysicalPath$appName;
-	    New-WebApplication -Name $appName -ApplicationPool $appName -Site $siteName -PhysicalPath $fullPhysicalPath$appName;
+	    New-WebApplication -Name $appName -ApplicationPool $siteName -Site $siteName -PhysicalPath $fullPhysicalPath$appName;
 	}
 	elseif((Get-WebApplication -Name $appName) -eq $null -and (Test-Path $appPath$appName) -eq $true)
 	{
-	    ConvertTo-WebApplication -ApplicationPool $appName $appPath$appName;
+	    ConvertTo-WebApplication -ApplicationPool $siteName $appPath$appName;
 	}
 	else
 	{
 	    echo "$appName já existe!";
+	}
+
+	# Cria redundância para os sites SELECIONADOS
+	if($carryOver -eq $true)
+	{
+		for ($i=1; $i -le 10; $i++)
+		{
+			if((Test-Path $appPath$appName$i) -eq 0 -and (Get-WebApplication -Name $appName$i) -eq $null)
+			{
+			    New-WebApplication -Name $appName$i -ApplicationPool $siteName -Site $siteName -PhysicalPath $fullPhysicalPath$appName;
+			}
+		}
 	}
 }
 
@@ -101,8 +146,8 @@ foreach ($appName in $apps)
 #New-WebApplication "TesteWebApp" -Site "Default Web Site" -ApplicationPool "RodrigoLessa" -PhysicalPath "C:\Temp\TesteWebApp"
 
 # Agora executa um teste no site
-#$ie=New-Object -com internetexplorer.application
-#$ie.visible = $true
-#$ie.Navigate(“http://localhost:80/”)
+#$ie=New-Object -com internetexplorer.application;
+#$ie.visible = $true;
+#$ie.Navigate(“http://localhost:$appPort/”);
 
-Write-Host " Fim do processo! " -nonewline
+Write-Host " Fim do processo! " -nonewline;
