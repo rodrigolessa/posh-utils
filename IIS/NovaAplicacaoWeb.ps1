@@ -15,7 +15,7 @@ Write-Host "!";
 ###############################################################################################
 # Selecionar qual o diretório físico das aplicações
 
-# TODO: Change drive letter
+# TODO: Change drive letter - WorkingCopy
 $physicalPath = "C:\Projetos_web\Copias_trabalho\";
 
 Write-Host "";
@@ -39,6 +39,69 @@ if((Test-Path $fullPhysicalPath) -eq 0)
 {
 	New-Item -ItemType directory -Path $fullPhysicalPath;
 }
+
+
+###############################################################################################
+# SVN - checkout de todos os diretórios das aplicações
+
+# Aplicações e versões em Urano (SVN)
+#Apol 			- http://urano:405/svn/Apol/trunk/Apol
+#Apolcli		- http://urano:405/svn/Apol/trunk/apolcli
+#WebServices 	- http://urano:405/svn/Apol/trunk/WebServices
+#Estatisticas	- ? (criar script para build) * siteld/trunk/LDSoft.Webseek
+#Intranet		- ? (criar script para build) * Intranet/trunk/LDSoft.Intranet
+#Portal_webseek - http://urano:405/svn/Intranet/trunk/Portal_webseek
+#Siteld 		- http://urano:405/svn/siteld/trunk/Siteld
+#Webseek 		- http://urano:405/svn/siteld/trunk/webseek
+#WSeekJuris 	- http://urano:405/svn/siteld/trunk/WSeekJuris
+
+# TODO: Alterar URL dos repositorios do SVN
+#$svnBasePath = "http://urano:405/svn/";
+$svnBasePath = "file:///C:/PRepositories/";
+# TODO: Alterar letra do drive ou caminho de instalação do TortoiseSVN
+$svnExePath = "C:\Program Files\TortoiseSVN\bin\SVN.exe";
+
+# Verifica se o SVN client está instalado
+if ((test-path "HKLM:\Software\TortoiseSVN") -eq $false) {
+	Write-Host "";
+	Write-Host -foregroundColor Red "Erro: O Tortoise, Cliente SVN, não está instalado.";
+	return;
+}
+
+# TODO: Verificar caso de todos os endereços, o SVN é case sensitive
+$appsApol 		= "Apol", "Apolcli", "WebServices";
+$appsIntranet 	= "Portal_webseek", "LDSoft.Intranet";
+$appsSiteld 	= "Siteld", "webseek", "WSeekJuris", "LDSoft.Webseek";
+
+$svnRepository = "Apol/"
+$svnBranch = "trunk/";
+
+# Checkout Apol
+foreach ($app in $appsApol)
+{
+	# Comando para download do Trunk das aplicações para a cópia de trabalho
+	#& $SVNExe checkout -r 23 $SVNURL $CheckOutLocation
+	& $svnExePath checkout $svnBasePath$svnRepository$svnBranch$app $fullPhysicalPath$app;
+}
+
+$svnRepository = "Intranet/"
+
+# Checkout Intranet
+
+$svnRepository = "siteld/"
+
+# Checkout SiteLD
+
+Write-Host "";
+
+# Pausa para download do código fonte das aplicações
+$endCheckout = Read-Host "Continue quando o checkout das aplicacoes terminar! [Enter] Para prosseguir";
+
+# TODO: Executar scripts de deploy para sites dotNet
+
+Write-Host "";
+
+# TODO: Pause para publicação de sites
 
 
 ###############################################################################################
@@ -69,17 +132,6 @@ if((Test-Path $appPath) -eq 0)
 	New-WebSite -Name $siteName -Port $appPort -HostHeader $siteName -PhysicalPath $fullPhysicalPath;
 }
 
-# Aplicações e versões em Urano (SVN)
-#Apol 			- http://urano:405/svn/Apol/trunk/Apol
-#Apolcli		- http://urano:405/svn/Apol/trunk/apolcli
-#WebServices 	- http://urano:405/svn/Apol/trunk/WebServices
-#Estatisticas	- ? (criar script para build)
-#Intranet		- ? (criar script para build)
-#Portal_webseek - http://urano:405/svn/Intranet/trunk/Portal_webseek
-#Siteld 		- http://urano:405/svn/siteld/trunk/Siteld
-#Webseek 		- http://urano:405/svn/siteld/trunk/webseek
-#WSeekJuris 	- http://urano:405/svn/siteld/trunk/WSeekJuris
-
 
 ###############################################################################################
 # Criando aplicações no Servidor IIS de Netuno
@@ -91,7 +143,7 @@ if((Test-Path $appPath) -eq 0)
 # | - Converte para aplicação com o endereço do site anterior
 
 # Definindo lista de aplicações
-$apps = "Apol*", "ViewPDF!", "Utilitario!", "captcha!", "Apolcli", "Estatisticas@", "Intranet@", "Portal_webseek", "Siteld", "Webseek*", "WebServices@", "wsCartas@!", "wsProcessos@!", "WSeekJuris*";
+$apps = "Apol*", "ViewPDF!", "Utilitario!", "captcha|", "Apolcli", "Estatisticas@", "Intranet@", "Portal_webseek", "Siteld", "Webseek*", "WebServices@", "wsCartas@!", "wsProcessos@!", "WSeekJuris*";
 
 # Cria um POOL com o nome do site/usuário
 if((Test-Path IIS:\AppPools\$siteName) -eq 0)
@@ -112,7 +164,7 @@ foreach ($appName in $apps)
 	$appName = $appName -replace "\*", "";
 	$appName = $appName -replace "@", "";
 	$appName = $appName -replace "!", "";
-	$appName = $appName -replace "|", "";
+	$appName = $appName -replace "\|", "";
 
 	# POOL
 	$deadPool = $siteName;
@@ -166,6 +218,8 @@ foreach ($appName in $apps)
 	}
 }
 
+
+###############################################################################################
 # Desconsiderar testes
 #New-WebApplication "TesteWebApp" -Site "Dev_rodrigo" -ApplicationPool "Temp" -PhysicalPath "D:\Projetos_web\Copias_trabalho\Rodrigo\Temp"
 #New-WebApplication "TesteWebApp" -Site "Default Web Site" -ApplicationPool "RodrigoLessa" -PhysicalPath "C:\Temp\TesteWebApp"
