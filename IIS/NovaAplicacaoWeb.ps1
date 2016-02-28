@@ -30,9 +30,9 @@ if(!($useDefaultPhysicalPath.ToString().ToLower() -eq "sim" -or $useDefaultPhysi
 
 Write-Host "";
 
-$userName = Read-Host "Informe o nome do USUARIO:";
+$userName = Read-Host "Informe o nome do USUARIO";
 
-$fullPhysicalPath = "$physicalPath$userName\";
+$fullPhysicalPath = $physicalPath + $userName + "\";
 
 # Se NÃO existir cria a raiz do diretório físico
 if((Test-Path $fullPhysicalPath) -eq 0)
@@ -84,58 +84,83 @@ if((Test-Path $appPath) -eq 0)
 ###############################################################################################
 # Criando aplicações no Servidor IIS de Netuno
 
-# Definindo lista de aplicações
+# Atributos das aplicações
 # * - Cria o site com redundância
 # @ - Cria o site com pool próprio com dotNet 4.0
 # ! - Converte somente para aplicação o subsite do site anterior
 # | - Converte para aplicação com o endereço do site anterior
-$apps = "Apol*", "!ViewPDF", "!Utilitario", "|captcha", "Apolcli", "Estatisticas@", "Intranet@", "Portal_webseek", "Siteld", "Webseek*", "WebServices", "!wsCartas", "!wsProcessos", "WSeekJuris*";
+
+# Definindo lista de aplicações
+$apps = "Apol*", "ViewPDF!", "Utilitario!", "captcha!", "Apolcli", "Estatisticas@", "Intranet@", "Portal_webseek", "Siteld", "Webseek*", "WebServices@", "wsCartas@!", "wsProcessos@!", "WSeekJuris*";
 
 # Cria um POOL com o nome do site/usuário
 if((Test-Path IIS:\AppPools\$siteName) -eq 0)
 {
 	New-WebAppPool -Name $siteName -Force;
+	Set-ItemProperty IIS:\AppPools\$siteName managedRuntimeVersion v2.0;
 }
 
 foreach ($appName in $apps)
 {
-	$carryOver = $appName -match "\*"
+	Write-Host " ";
+
+	# Identificando atributos das aplicações
+	$carryOver = $appName -match "\*";
+	$selfPool = $appName -match "@";
 
 	# Removendo atributos das aplicações
-	$appName = $appName -replace "*", "";
+	$appName = $appName -replace "\*", "";
 	$appName = $appName -replace "@", "";
 	$appName = $appName -replace "!", "";
 	$appName = $appName -replace "|", "";
 
+	# POOL
+	$deadPool = $siteName;
+
 	# Se NÃO existir um Pool com o nome da aplicação, cria!, somente para aplicações .Net
-	if((Test-Path IIS:\AppPools\$appName) -eq 0)
+	if((Test-Path IIS:\AppPools\$appName) -eq 0 -and $selfPool -eq $true)
 	{
 	    New-WebAppPool -Name $appName -Force;
+	    Set-ItemProperty IIS:\AppPools\$appName managedRuntimeVersion v4.0;
+	    
 	}
 
-	# Se NÃO existir cria o diretório físico e virtual, se existir o físico, converte para aplicação
-	if((Test-Path $appPath$appName) -eq 0 -and (Get-WebApplication -Name $appName) -eq $null)
+	if($selfPool -eq $true)
 	{
-	    New-Item -ItemType directory -Path $fullPhysicalPath$appName;
-	    New-WebApplication -Name $appName -ApplicationPool $siteName -Site $siteName -PhysicalPath $fullPhysicalPath$appName;
+		$deadPool = $appName;
 	}
-	elseif((Get-WebApplication -Name $appName) -eq $null -and (Test-Path $appPath$appName) -eq $true)
+
+	# FOLDERS
+	# Se NÃO existir cria o diretório físico
+	#if((Test-Path $fullPhysicalPath$appName) -eq 0)
+	#{
+	#	New-Item -ItemType directory -Path $fullPhysicalPath$appName;
+	#}
+
+	# APPLICATIONS
+	# Se NÃO existir cria o diretório físico e virtual, se existir o físico, converte para aplicação
+	if((Test-Path $appPath$appName) -eq 0 -and (Get-WebApplication -Name $appPath$appName) -eq $null)
 	{
-	    ConvertTo-WebApplication -ApplicationPool $siteName $appPath$appName;
+		New-Item -ItemType directory -Path $fullPhysicalPath$appName;
+	    New-WebApplication -Name $appName -ApplicationPool $deadPool -Site $siteName -PhysicalPath $fullPhysicalPath$appName;
+	}
+	elseif((Get-WebApplication -Name $appPath$appName) -eq $null -and (Test-Path $appPath$appName) -eq $true)
+	{
+	    ConvertTo-WebApplication -ApplicationPool $deadPool $appPath$appName;
 	}
 	else
 	{
-	    echo "$appName já existe!";
+	    Write-Host "$appName jah existe!";
 	}
 
-	# Cria redundância para os sites SELECIONADOS
+	# Cria REDUNDÂNCIA para os sites selecionados
 	if($carryOver -eq $true)
 	{
 		for ($i=1; $i -le 10; $i++)
 		{
-			if((Test-Path $appPath$appName$i) -eq 0 -and (Get-WebApplication -Name $appName$i) -eq $null)
+			if((Test-Path $appPath$appName$i) -eq 0 -and (Get-WebApplication -Name $appPath$appName$i) -eq $null)
 			{
-			    New-WebApplication -Name $appName$i -ApplicationPool $siteName -Site $siteName -PhysicalPath $fullPhysicalPath$appName;
+			    New-WebApplication -Name $appName$i -ApplicationPool $deadPool -Site $siteName -PhysicalPath $fullPhysicalPath$appName;
 			}
 		}
 	}
@@ -147,7 +172,8 @@ foreach ($appName in $apps)
 
 # Agora executa um teste no site
 #$ie=New-Object -com internetexplorer.application;
-#$ie.visible = $true;
-#$ie.Navigate(“http://localhost:$appPort/”);
+#$ie.visible=$true;
+#$ie.Navigate("http://localhost:$appPort/");
 
-Write-Host " Fim do processo! " -nonewline;
+Write-Host " ";
+Write-Host " Fim do processo! ";
