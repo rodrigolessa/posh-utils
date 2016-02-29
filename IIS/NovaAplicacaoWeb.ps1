@@ -2,6 +2,9 @@
 #Set-ExecutionPolicy RemoteSigned
 Set-executionpolicy -scope CurrentUser -executionPolicy Undefined
 
+# Instalação do Web Deploy, forma de publicar um projeto .Net
+# http://www.iis.net/downloads/microsoft/web-deploy
+
 # Importando módulos para ter acesso ao recursos do IIS
 Import-Module WebAdministration;
 
