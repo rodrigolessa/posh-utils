@@ -87,10 +87,18 @@ foreach ($app in $appsApol)
 $svnRepository = "Intranet/"
 
 # Checkout Intranet
+foreach ($app in $appsIntranet)
+{
+	& $svnExePath checkout $svnBasePath$svnRepository$svnBranch$app $fullPhysicalPath$app;
+}
 
 $svnRepository = "siteld/"
 
 # Checkout SiteLD
+foreach ($app in $appsSiteld)
+{
+	& $svnExePath checkout $svnBasePath$svnRepository$svnBranch$app $fullPhysicalPath$app;
+}
 
 Write-Host "";
 
@@ -98,11 +106,12 @@ Write-Host "";
 $endCheckout = Read-Host "Continue quando o checkout das aplicacoes terminar! [Enter] Para prosseguir";
 
 # TODO: Executar scripts de deploy para sites dotNet
+#if((Test-Path $fullPhysicalPath) -eq 0)
 
 Write-Host "";
 
 # TODO: Pause para publicação de sites
-
+$endCheckout = Read-Host "Continue quando a publicacao dos sites estiver concluida! [Enter] Para prosseguir";
 
 ###############################################################################################
 # Selecionar qual o diretório virtual no IIS
@@ -143,9 +152,10 @@ if((Test-Path $appPath) -eq 0)
 # | - Converte para aplicação com o endereço do site anterior
 
 # Definindo lista de aplicações
-$apps = "Apol*", "ViewPDF!", "Utilitario!", "captcha|", "Apolcli", "Estatisticas@", "Intranet@", "Portal_webseek", "Siteld", "Webseek*", "WebServices@", "wsCartas@!", "wsProcessos@!", "WSeekJuris*";
+#$apps = "Apol*", "ViewPDF!", "Utilitario!", "captcha|", "Apolcli", "Estatisticas@", "Intranet@", "Portal_webseek", "Siteld", "Webseek*", "WebServices@", "wsCartas@!", "wsProcessos@!", "WSeekJuris*";
+$apps = "Apol*", "Apolcli", "Estatisticas@", "Intranet@", "Portal_webseek", "Siteld", "Webseek*", "WebServices@", "WSeekJuris*";
 
-# Cria um POOL com o nome do site/usuário
+# Cria um POOL com o nome do site/usuário, na versão 2.0 do framework dotNet
 if((Test-Path IIS:\AppPools\$siteName) -eq 0)
 {
 	New-WebAppPool -Name $siteName -Force;
@@ -174,7 +184,6 @@ foreach ($appName in $apps)
 	{
 	    New-WebAppPool -Name $appName -Force;
 	    Set-ItemProperty IIS:\AppPools\$appName managedRuntimeVersion v4.0;
-	    
 	}
 
 	if($selfPool -eq $true)
@@ -193,7 +202,8 @@ foreach ($appName in $apps)
 	# Se NÃO existir cria o diretório físico e virtual, se existir o físico, converte para aplicação
 	if((Test-Path $appPath$appName) -eq 0 -and (Get-WebApplication -Name $appPath$appName) -eq $null)
 	{
-		New-Item -ItemType directory -Path $fullPhysicalPath$appName;
+		# Cria o diretório físico, sem utilidade no momento
+		#New-Item -ItemType directory -Path $fullPhysicalPath$appName;
 	    New-WebApplication -Name $appName -ApplicationPool $deadPool -Site $siteName -PhysicalPath $fullPhysicalPath$appName;
 	}
 	elseif((Get-WebApplication -Name $appPath$appName) -eq $null -and (Test-Path $appPath$appName) -eq $true)
@@ -215,6 +225,46 @@ foreach ($appName in $apps)
 			    New-WebApplication -Name $appName$i -ApplicationPool $deadPool -Site $siteName -PhysicalPath $fullPhysicalPath$appName;
 			}
 		}
+	}
+}
+
+
+###############################################################################################
+# Criando sub-domínios
+
+# Cria uma aplicação para o CAPTCHA no endereço físico do Apol
+if((Test-Path $appPath + "Apol") -eq $true -and (Get-WebApplication -Name $appPath + "captcha") -eq $null)
+{
+	New-WebApplication -Name "captcha" -ApplicationPool $siteName -Site $siteName -PhysicalPath $fullPhysicalPath + "Apol";
+}
+
+# Cria uma aplicação para o View PDF
+if((Get-WebApplication -Name $appPath + "Apol\ViewPDF") -eq $null -and (Test-Path $appPath + "Apol\ViewPDF") -eq $true)
+{
+	ConvertTo-WebApplication -ApplicationPool $siteName $appPath + "Apol\ViewPDF";
+}
+
+# Cria uma aplicação para Utilitários da SNAP - 
+if((Get-WebApplication -Name $appPath + "Apol\Utilitario") -eq $null -and (Test-Path $appPath + "Apol\Utilitario") -eq $true)
+{
+	ConvertTo-WebApplication -ApplicationPool $siteName $appPath + "Apol\Utilitario";
+}
+
+# Cria uma aplicação para os Serviços de Cartas do Apol
+if((Get-WebApplication -Name $appPath + "WebServices\wsCartas") -eq $null -and (Test-Path $appPath + "WebServices\wsCartas") -eq $true)
+{
+	if((Test-Path IIS:\AppPools\WebServices) -eq $true)
+	{
+		ConvertTo-WebApplication -ApplicationPool "WebServices" $appPath + "WebServices\wsCartas";
+	}
+}
+
+# Cria uma aplicação para os Serviços de Inclusão e Alteração de Processos do Apol
+if((Get-WebApplication -Name $appPath + "WebServices\wsProcessos") -eq $null -and (Test-Path $appPath + "WebServices\wsProcessos") -eq $true)
+{
+	if((Test-Path IIS:\AppPools\WebServices) -eq $true)
+	{
+		ConvertTo-WebApplication -ApplicationPool "WebServices" $appPath + "WebServices\wsProcessos";
 	}
 }
 
