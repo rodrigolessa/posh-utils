@@ -1,1 +1,1 @@
-PowerShell -NoProfile -ExecutionPolicy Bypass -noexit -Command "& 'C:\Projetos\scripts.launcher.deploy\IIS\NovaAplicacaoWeb.ps1'"
+PowerShell -NoProfile -ExecutionPolicy Bypass -noexit -Command "& 'D:\Projetos\scripts.launcher.deploy\IIS\NovaAplicacaoWeb.ps1'"
