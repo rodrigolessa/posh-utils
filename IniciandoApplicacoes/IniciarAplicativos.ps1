@@ -3,7 +3,7 @@
 set-executionpolicy -scope CurrentUser -executionPolicy Undefined
 
 # Importando módulos para ter acesso ao recursos do IIS
-Import-Module WebAdministration;
+#Import-Module WebAdministration;
 
 Write-Host ""
 
@@ -49,10 +49,10 @@ Write-Host "Aguarde enquanto inicio suas aplicacoes..."
 [Diagnostics.Process]::Start("C:\Program Files\Microsoft Office 15\root\office15\OUTLOOK.EXE")
 
 # Runs Sublime Teste using the Static Start method and opens a Apol folder
-[Diagnostics.Process]::Start("C:\Program Files\Sublime Text 2\sublime_text.exe","N:\Apol")
+[Diagnostics.Process]::Start("C:\Program Files\Sublime Text 3\sublime_text.exe","N:\Apol")
 
 # Runs Sublime Teste using the Static Start method and opens a Apol folder
-[Diagnostics.Process]::Start("C:\Program Files\Sublime Text 2\sublime_text.exe","N:\Webseek")
+#[Diagnostics.Process]::Start("C:\Program Files\Sublime Text 2\sublime_text.exe","N:\Webseek")
 
 # TODO: Set Netuno:101 Apol on IE Browser, login and open reconnect.asp
 
@@ -61,6 +61,16 @@ Write-Host "Aguarde enquanto inicio suas aplicacoes..."
 
 # Run timesheet on Excel
 [Diagnostics.Process]::Start("C:\Program Files\Microsoft Office 15\root\office15\EXCEL.EXE", "C:\Users\RLessa\Desktop\ponto201601.xlsx")
+
+###############################################################################################
+# Atalhos
+
+Set-Alias sublime "C:\Program Files\Sublime Text 3\sublime_text.exe"
+
+function go-projetos
+{
+	set-location N:\Apol
+}
 
 ###############################################################################################
 # SVN - checkout de todos os diretórios das aplicações
@@ -81,11 +91,10 @@ if ((test-path "HKLM:\Software\TortoiseSVN") -eq $false) {
 
 #& $svnExePath checkout $svnBasePath$svnRepository$svnBranch$app $fullPhysicalPath$app;
 
-
-
 Write-Host " ";
 Write-Host " Fim do processo! ";
 
+go-projetos
 
 # TODO: Manter aberta a janela de script powerShell
 # -noexit
