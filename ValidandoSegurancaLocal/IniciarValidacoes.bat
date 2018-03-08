@@ -1,0 +1,1 @@
+PowerShell -NoProfile -ExecutionPolicy Bypass -noexit -Command "& 'D:\github\scripts.launcher.deploy\ValidandoSegurancaLocal\CheckAntivirus.ps1'"
