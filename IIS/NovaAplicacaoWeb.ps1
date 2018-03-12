@@ -1,4 +1,4 @@
-# Tentativa ignorar as polÃ­ticas locais
+# Tentativa ignorar as politicas locais
 #Set-ExecutionPolicy RemoteSigned
 Set-executionpolicy -scope CurrentUser -executionPolicy Undefined
 
@@ -8,10 +8,14 @@ Set-executionpolicy -scope CurrentUser -executionPolicy Undefined
 # Importando módulos para ter acesso ao recursos do IIS
 Import-Module WebAdministration;
 
+# Obter nome do usuário logado e dados do domínio
+#$env:UserName
+#$env:UserDomain
+#$env:ComputerName
 
 Write-Host "";
-Write-Host "Seja bem-vindo" -nonewline;
-Write-Host " Rodrigo " -foregroundcolor red -nonewline;
+Write-Host "Seja bem-vindo " -nonewline;
+Write-Host $env:UserName -foregroundcolor red -nonewline;
 Write-Host "!";
 
 
@@ -20,6 +24,7 @@ Write-Host "!";
 
 # TODO: Change drive letter - WorkingCopy
 $physicalPath = "D:\Projetos_web\Copias_trabalho\";
+$configPath = "D:\Arquivos de Configuração\DevConfig\";
 
 Write-Host "";
 
@@ -51,12 +56,13 @@ if((Test-Path $fullPhysicalPath) -eq 0)
 ###############################################################################################
 # SVN - checkout de todos os diretórios das aplicações
 
-# Aplicações e versÃµes em Urano (SVN)
+# Aplicações e versão em Urano (SVN)
 #Apol 			- http://urano:405/svn/Apol/trunk/Apol
 #Apolcli		- http://urano:405/svn/Apol/trunk/apolcli
 #WebServices 	- http://urano:405/svn/Apol/trunk/WebServices
 #Estatisticas	- ? (criar script para build) * siteld/trunk/LDSoft.Webseek
 #Intranet		- ? (criar script para build) * Intranet/trunk/LDSoft.Intranet
+#EnergyWay		- ? (criar script para build)
 #Portal_webseek - http://urano:405/svn/Intranet/trunk/Portal_webseek
 #Siteld 		- http://urano:405/svn/siteld/trunk/Siteld
 #Webseek 		- http://urano:405/svn/siteld/trunk/webseek
@@ -64,24 +70,32 @@ if((Test-Path $fullPhysicalPath) -eq 0)
 
 # TODO: Alterar URL dos repositorios do SVN
 $svnBasePath = "http://urano:405/svn/";
-# TODO: Alterar letra do drive ou caminho de instalação do TortoiseSVN
+# TODO: Alterar letra do drive ou caminho de instalacao do TortoiseSVN
 $svnExePath = "C:\Program Files\TortoiseSVN\bin\SVN.exe";
 
 # Verifica se o SVN client está instalado
 if ((test-path "HKLM:\Software\TortoiseSVN") -eq $false) {
 	Write-Host "";
-	Write-Host -foregroundColor Red "Erro: O Tortoise, Cliente SVN, nÃ£o está instalado.";
+	Write-Host -foregroundColor Red "Erro: O Tortoise, Cliente SVN, nao está instalado.";
 	return;
 }
 
-# TODO: Verificar caso de todos os endereços, o SVN é case sensitive
-$appsApol 		= "Apol", "Apolcli", "WebServices";
+# TODO: Verificar se já existe a pasta com os arquivos de configuração dos sistemas:
+#if ((test-path $configPath) -eq $false) {
+#   TODO: Se não existir a pasta de configuração fazer checkout dos arquivos:
+#	Write-Host "";
+#	Write-Host -foregroundColor Red "Erro: O Tortoise, Cliente SVN, nao está instalado.";
+#}
+
+# Verificar caso de todos os endereços, o SVN é case sensitive
+$appsApol 		= "Apol", "apolcli", "WebServices";
 $appsIntranet 	= "Portal_webseek", "LDSoft.Intranet";
-$appsSiteld 	= "Siteld", "webseek", "WSeekJuris";	#, "LDSoft.Webseek";
+$appsSiteld 	= "Siteld", "webseek", "WSeekJuris", "LDSoft.Webseek";
 
 $svnRepository = "Apol/"
 $svnBranch = "trunk/";
 
+###########################
 # Checkout Apol
 foreach ($app in $appsApol)
 {
@@ -106,10 +120,19 @@ foreach ($app in $appsSiteld)
 	& $svnExePath checkout $svnBasePath$svnRepository$svnBranch$app $fullPhysicalPath$app;
 }
 
+#TODO: Fazer o checkout do projeto LDSoft.Intranet na raiz de copias de trabalho para executar scripts de deploy
+#TODO: Fazer o checkout do projeto LDSoft.Webseek na raiz de copias de trabalho para executar scripts de deploy
+
 Write-Host "";
 
 # Pausa para download do código fonte das aplicações
+# TODO: Trocar pausa por contadro aguardando publicação
 $endCheckout = Read-Host "Continue quando o checkout das aplicacoes terminar! [Enter] Para prosseguir";
+
+###########################
+# TODO: Copiar arquivos de configuração para pasta do usuário
+# TODO: powershell copy
+#D:\Arquivos de Configuração\DevConfig
 
 
 ###############################################################################################
@@ -118,8 +141,19 @@ $endCheckout = Read-Host "Continue quando o checkout das aplicacoes terminar! [E
 
 Write-Host "";
 
-# TODO: Pause para publicação de sites
+# Pause para publicação de sites
+# TODO: Trocar pausa por verificação se todos os projetos estão publicados
 $endCheckout = Read-Host "Continue quando a publicacao dos sites estiver concluida! [Enter] Para prosseguir";
+
+
+###############################################################################################
+
+# TODO: Permissão total ao usuário do IIS em todas as pastas de projetos do usuário
+
+# Apol, Apolcli, WebServices; Portal_webseek, LDSoft.Intranet; Siteld, webseek, WSeekJuris, LDSoft.Webseek;
+# Permissão em todas as pastas do full Physical Path
+#foreach ($app in $appsApol)
+#	& $svnExePath checkout $svnBasePath$svnRepository$svnBranch$app $fullPhysicalPath$app;
 
 
 ###############################################################################################
@@ -161,17 +195,25 @@ if((Test-Path $appPath) -eq 0)
 # ! - Converte somente para aplicação o subsite do site anterior
 # | - Converte para aplicação com o endereço do site anterior
 
-# Definindo lista de aplicações #$apps = "Apol*", "ViewPDF!", "Utilitario!", "captcha|", "Apolcli", "Estatisticas@", "Intranet@", "Portal_webseek", "Siteld", "Webseek*", "WebServices@", "wsCartas@!", "wsProcessos@!", "WSeekJuris*";
-$apps = "Apol*", "Apolcli", "Estatisticas@", "Intranet@", "Portal_webseek", "Siteld", "Webseek*", "WebServices@", "WSeekJuris*";
+# Definindo lista de aplicações 
+#  "Apol*" -> mesmo endereço: "captcha|" -> subdominios: "ViewPDF!", "Utilitario!"
+#  "Apolcli"
+#  "Estatisticas@" -> TODO: Scripts para publicação do site .net
+#  "Intranet@" -> TODO: Scripts para publicação do site .net
+#  "Portal_webseek"
+#  "Siteld"
+#  "Webseek*"
+#  "WebServices@" -> TODO: Scripts para publicação do serviço .net -> subdomínios: "wsCartas@!", "wsProcessos@!"
+#  "WSeekJuris*";
+$apps = "Apol*", "Apolcli", "Estatisticas@", "Intranet@", "Portal_webseek", "Siteld", "Webseek*", "WebServices@", "WSeekJuris*", "Energyway@";
 
 # Cria um POOL com o nome do site/usuário, na versão 2.0 do framework dotNet
 if((Test-Path IIS:\AppPools\$siteName) -eq 0)
 {
 	New-WebAppPool -Name $siteName -Force;
 	Set-ItemProperty IIS:\AppPools\$siteName managedRuntimeVersion v2.0;
+    # TODO: Habilitar execução em 32bits no POOL
 }
-
-# TODO: Trocar o pool do site pelo novo criado
 
 # TODO: Executar o comando migrate para corrigir aplicação do IIS6 para IIS7 (afeta todos os arquivos de configuração)
 #appcmd migrate config "$siteName/"
@@ -199,9 +241,11 @@ foreach ($appName in $apps)
 	{
 	    New-WebAppPool -Name $appName -Force;
 	    Set-ItemProperty IIS:\AppPools\$appName managedRuntimeVersion v4.0;
+        # TODO: Habilitar execução em 32bits no POOL
 	}
 
-	if($selfPool -eq $true)
+    # Trocar o pool do site pelo novo criado	
+    if($selfPool -eq $true)
 	{
 		$deadPool = $appName;
 	}
@@ -290,9 +334,10 @@ if((Get-WebApplication -Name $appPath$mergeRTFApolFolder) -eq $null -and (Test-P
 	New-WebApplication -Name $mergeRTFApolFolder -ApplicationPool $siteName -Site $siteName -PhysicalPath $fullPhysicalPath$apolFolder$separadorFisico$mergeRTFApolFolder;
 }
 
-# TODO: Verificar necessidade do site comunicaÃ§Ã£o - D:\Projetos_web\Copias_trabalho\Rodrigo\Apol\utilitarios\Comunicacao
+# TODO: Verificar necessidade do site comunicação - D:\Projetos_web\Copias_trabalho\Rodrigo\Apol\utilitarios\Comunicacao
 
 # Cria uma aplicação para os Serviços de Cartas do Apol
+# TODO: Verificar o que falta no pool de cartas, pois não funciona em Saturno
 $webServicesFolder = "WebServices";
 $wsCartasFolder = "\wsCartas";
 if((Get-WebApplication -Name $appPath$webServicesFolder$wsCartasFolder) -eq $null -and (Test-Path $appPath$webServicesFolder$wsCartasFolder) -eq $true)

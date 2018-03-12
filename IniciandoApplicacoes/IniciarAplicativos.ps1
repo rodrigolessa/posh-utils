@@ -2,13 +2,15 @@
 #Set-ExecutionPolicy RemoteSigned
 set-executionpolicy -scope CurrentUser -executionPolicy Undefined
 
-# Importando módulos para ter acesso ao recursos do IIS
+# Importando mÃ³dulos para ter acesso ao recursos do IIS
 #Import-Module WebAdministration;
 
 Write-Host ""
 
+# Write-Host " Rodrigo " -foregroundcolor red -backgroundcolor yellow -nonewline
+
 Write-Host "Seja bem-vindo" -nonewline
-Write-Host " Rodrigo " -foregroundcolor red -backgroundcolor yellow -nonewline
+Write-Host " Rodrigo" -foregroundcolor red -nonewline
 Write-Host "!"
 
 Write-Host ""
@@ -29,32 +31,38 @@ Write-Host "Aguarde enquanto inicio suas aplicacoes..."
 # Abrir sistemas mais utilizados :
 
 # Open Microsoft DotNet IDE
-[Diagnostics.Process]::Start("C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\devenv.exe")
+[Diagnostics.Process]::Start("C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\devenv.exe")
 
 # Open SQL Management
-[Diagnostics.Process]::Start("C:\Program Files (x86)\Microsoft SQL Server\100\Tools\Binn\VSShell\Common7\IDE\Ssms.exe")
+[Diagnostics.Process]::Start("C:\Program Files (x86)\Microsoft SQL Server\140\Tools\Binn\ManagementStudio\Ssms.exe")
+
+# Runs Sublime Teste using the Static Start method and opens a Apol folder
+#[Diagnostics.Process]::Start("C:\Program Files\Sublime Text 3\sublime_text.exe","X:\Apol")
+
+# Runs Sublime Teste using the Static Start method and opens a WEBSEEK folder
+#[Diagnostics.Process]::Start("C:\Program Files\Sublime Text 3\sublime_text.exe","X:\Webseek")
 
 # Open Google Browser
-[Diagnostics.Process]::Start("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe")
+[Diagnostics.Process]::Start("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", "https://ldsoftdesenv.visualstudio.com/")
+
+# Open IceScrum
+#[Diagnostics.Process]::Start("http://netuno:8080/icescrum/p/WSESTATIST#sprintPlan")
 
 # Run default e-mail application
-[Diagnostics.Process]::Start("C:\Program Files\Microsoft Office 15\root\office15\OUTLOOK.EXE")
+#[Diagnostics.Process]::Start("C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE")
+
+# Run default instant message application
+#[Diagnostics.Process]::Start("C:\Program Files\Microsoft Office\Root\Office16\lync.exe")
 
 #start-process myfile.txt -workingdirectory "C:\PS-Test" -verb Print
 
 
 ###############################################################################################
-# TODO: Open endereços internos mais utilizados
+# TODO: Open enderecos internos mais utilizados
 # Agora executa um teste no site
 #$ie=New-Object -com internetexplorer.application;
 #$ie.visible=$true;
 #$ie.Navigate("http://localhost:$appPort/");
-
-# Runs Sublime Teste using the Static Start method and opens a Apol folder
-[Diagnostics.Process]::Start("C:\Program Files\Sublime Text 3\sublime_text.exe","N:\Apol")
-
-# Runs Sublime Teste using the Static Start method and opens a Apol folder
-[Diagnostics.Process]::Start("C:\Program Files\Sublime Text 3\sublime_text.exe","N:\Webseek")
 
 # TODO: Set Netuno:101 Apol on IE Browser, login and open reconnect.asp
 
@@ -67,9 +75,10 @@ Write-Host "Aguarde enquanto inicio suas aplicacoes..."
 # Pastas de trabalho
 $startinfo = new-object System.Diagnostics.ProcessStartInfo 
 $startinfo.FileName = "explorer.exe"
-$startinfo.WorkingDirectory = 'C:\branchSiteLD\Branch_Estatistica_v1.1.0.0'
+$startinfo.WorkingDirectory = 'X:\Apol'
 
 [System.Diagnostics.Process]::Start($startinfo)
+
 
 ###############################################################################################
 # Atalhos
@@ -78,24 +87,24 @@ Set-Alias sublime "C:\Program Files\Sublime Text 3\sublime_text.exe"
 
 function go-projetos
 {
-	set-location N:\Apol
+	set-location X:\Apol
 }
 
 
 ###############################################################################################
-# SVN - checkout de todos os diretórios das aplicações
+# SVN - checkout de todos os diretorios das aplicacoes
 
-# Selecionar qual o diretório físico das aplicações
+# Selecionar qual o diretorio fisico das aplicacoes
 
 $physicalPath = "D:\Projetos_web\Copias_trabalho\";
 
 # TODO: Alterar letra do drive ou caminho de instalacao do TortoiseSVN
 $svnExePath = "C:\Program Files\TortoiseSVN\bin\SVN.exe";
 
-# Verifica se o SVN client está instalado
+# Verifica se o SVN client estah instalado
 if ((test-path "HKLM:\Software\TortoiseSVN") -eq $false) {
 	Write-Host "";
-	Write-Host -foregroundColor Red "Erro: O Tortoise, Cliente SVN, nao está instalado.";
+	Write-Host -foregroundColor Red "Erro: O Tortoise, Cliente SVN, nao estah instalado.";
 	return;
 }
 
