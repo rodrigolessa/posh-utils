@@ -1,0 +1,1 @@
+packages\ReportGenerator.1.9.1.0\reportgenerator.exe -reports:outputCoverage.xml -targetDir:CodeCoverageHTML

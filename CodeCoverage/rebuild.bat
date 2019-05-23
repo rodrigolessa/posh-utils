@@ -1,0 +1,1 @@
+%SYSTEMROOT%\Microsoft.NET\Framework\v4.0.30319\msbuild.exe LDSoft.Comum.sln /p:Configuration=Debug /p:Platform="Any CPU" /t:rebuild
