@@ -1,0 +1,8 @@
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\CommonExtensions\Microsoft\TestWindow\
+ - vstest.console.exe
+
+C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\
+ - xsd.exe
+
+
+ ? TrxerConsole.exe
