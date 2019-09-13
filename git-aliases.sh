@@ -1,4 +1,4 @@
-#[alias] chs = !git checkout $1 && git status
+[alias] chs = !git checkout $1 && git status
 
 #alias d = !git diff --name-only HEAD^
 
