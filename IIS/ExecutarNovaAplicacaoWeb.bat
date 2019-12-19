@@ -1,1 +1,1 @@
-PowerShell -NoProfile -ExecutionPolicy Bypass -noexit -Command "& 'D:\Scripts de Deploy\IIS\NovaAplicacaoWeb.ps1'"
+PowerShell -NoProfile -ExecutionPolicy Bypass -noexit -Command "& 'D:\Scripts de Deploy\IIS\FromGitToIISWorkingCopy.ps1'"

@@ -28,7 +28,13 @@
 
 # git archive -o pacote.zip HEAD $(git diff --name-only bug/8741..master)
 
+## 2.3 Git Basics - Viewing the Commit History
+
+## https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History
+
 # git log --pretty=format:"%h - %an, %ar : %s" --name-only
+
+# git log --pretty=format:"%h - %an, %ar : %s"
 
 # my_alias = "!f() { 〈your complex command〉 }; f"
 
@@ -38,3 +44,11 @@
 
 # d = "!f() { git diff --name-only @r..master; }; f"
 # d = "!f() { git diff --name-only HEAD^; }; f"
+
+## 0.0 Squash commits into one with Git
+
+## https://www.internalpointers.com/post/squash-commits-into-one-git
+
+# git rebase --interactive HEAD~[N]
+
+# git rebase --interactive [commit-hash]
